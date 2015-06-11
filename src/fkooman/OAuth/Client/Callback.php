@@ -19,12 +19,11 @@ namespace fkooman\OAuth\Client;
 use fkooman\OAuth\Client\Exception\CallbackException;
 // FIXME: replace AuthorizeException with CallbackException?
 use fkooman\OAuth\Client\Exception\AuthorizeException;
-use GuzzleHttp\Client;
 
 class Callback
 {
     /**
-     * @var int
+     * @var string
      */
     private $clientConfigId;
 
@@ -39,7 +38,7 @@ class Callback
     private $tokenStorage;
 
     /**
-     * @var Client
+     * @var \fkooman\OAuth\Client\HttpClientInterface
      */
     private $httpClient;
 
@@ -47,7 +46,7 @@ class Callback
         $clientConfigId,
         ClientConfigInterface $clientConfig,
         StorageInterface $tokenStorage,
-        Client $httpClient
+        HttpClientInterface $httpClient
     ) {
         $this->setClientConfigId($clientConfigId);
         $this->setClientConfig($clientConfig);
@@ -88,7 +87,7 @@ class Callback
         return $this->tokenStorage;
     }
 
-    public function setHttpClient(Client $httpClient)
+    public function setHttpClient(HttpClientInterface $httpClient)
     {
         $this->httpClient = $httpClient;
     }
@@ -110,14 +109,14 @@ class Callback
         }
         $state = $this->tokenStorage->getState($this->clientConfigId, $queryState);
         if (false === $state) {
-            #throw new CallbackException('state not found');
+            throw new CallbackException('state not found');
         }
 
         // avoid race condition for state by really needing a confirmation
         // that it was deleted
-        #if (false === $this->tokenStorage->deleteState($state)) {
-            #throw new CallbackException('state already used');
-        #}
+        if (false === $this->tokenStorage->deleteState($state)) {
+            throw new CallbackException('state already used');
+        }
 
         if (null === $queryCode && null === $queryError) {
             throw new CallbackException('both code and error parameter missing');

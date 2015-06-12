@@ -16,6 +16,7 @@
  */
 namespace fkooman\OAuth\Client;
 
+use cdyweb\http\psr\Response;
 use fkooman\OAuth\Common\Scope;
 
 class TokenRequestTest extends \PHPUnit_Framework_TestCase
@@ -120,7 +121,7 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testWithAuthorizationCode()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->once())
             ->method('setBasicAuth')
@@ -130,10 +131,10 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
             ->method('post')
             ->with(
                 $this->clientConfig[0]->getTokenEndpoint(),
-                array('code' => '12345','grant_type'=>'authorization_code'),
-                array('Accept' => 'application/json')
+                array('Accept' => 'application/json'),
+                array('code' => '12345','grant_type'=>'authorization_code')
             )
-            ->will($this->returnValue($this->tokenResponse[0]));
+            ->will($this->returnValue(new Response(200,array(),json_encode($this->tokenResponse[0]))));
 
         $tokenRequest = new TokenRequest($client, $this->clientConfig[0]);
         $result = $tokenRequest->withAuthorizationCode('12345');
@@ -143,7 +144,7 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testWithAuthorizationCodeCredentialsInRequestBody()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->never())
             ->method('setBasicAuth');
@@ -152,10 +153,10 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
             ->method('post')
             ->with(
                 $this->clientConfig[1]->getTokenEndpoint(),
-                array('code' => '12345','grant_type'=>'authorization_code','redirect_uri'=>'http://foo.example.org/callback','client_id'=>'foo','client_secret'=>'bar'),
-                array('Accept' => 'application/json')
+                array('Accept' => 'application/json'),
+                array('code' => '12345','grant_type'=>'authorization_code','redirect_uri'=>'http://foo.example.org/callback','client_id'=>'foo','client_secret'=>'bar')
             )
-            ->will($this->returnValue($this->tokenResponse[0]));
+            ->will($this->returnValue(new Response(200,array(),json_encode($this->tokenResponse[0]))));
 
         $tokenRequest = new TokenRequest($client, $this->clientConfig[1]);
         $result = $tokenRequest->withAuthorizationCode('12345');
@@ -165,16 +166,16 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testAllowStringExpiresIn()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->once())
             ->method('post')
             ->with(
                 $this->clientConfig[2]->getTokenEndpoint(),
-                array('code' => '12345','grant_type'=>'authorization_code','redirect_uri'=>'http://foo.example.org/callback'),
-                array('Accept' => 'application/json')
+                array('Accept' => 'application/json'),
+                array('code' => '12345','grant_type'=>'authorization_code','redirect_uri'=>'http://foo.example.org/callback')
             )
-            ->will($this->returnValue($this->tokenResponse[2]));
+            ->will($this->returnValue(new Response(200,array(),json_encode($this->tokenResponse[2]))));
 
         $tokenRequest = new TokenRequest($client, $this->clientConfig[2]);
         $tokenResponse = $tokenRequest->withAuthorizationCode('12345');
@@ -183,16 +184,16 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testAllowArrayScope()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->once())
             ->method('post')
             ->with(
                 $this->clientConfig[3]->getTokenEndpoint(),
-                array('code' => '12345','grant_type'=>'authorization_code','redirect_uri'=>'http://foo.example.org/callback'),
-                array('Accept' => 'application/json')
+                array('Accept' => 'application/json'),
+                array('code' => '12345','grant_type'=>'authorization_code','redirect_uri'=>'http://foo.example.org/callback')
             )
-            ->will($this->returnValue($this->tokenResponse[3]));
+            ->will($this->returnValue(new Response(200,array(),json_encode($this->tokenResponse[3]))));
 
         $tokenRequest = new TokenRequest($client, $this->clientConfig[3]);
         $tokenResponse = $tokenRequest->withAuthorizationCode('12345');
@@ -201,16 +202,16 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testAllowCommaSeparatedScope()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->once())
             ->method('post')
             ->with(
                 $this->clientConfig[4]->getTokenEndpoint(),
-                array('code' => '12345','grant_type'=>'authorization_code','redirect_uri'=>'http://foo.example.org/callback'),
-                array('Accept' => 'application/json')
+                array('Accept' => 'application/json'),
+                array('code' => '12345','grant_type'=>'authorization_code','redirect_uri'=>'http://foo.example.org/callback')
             )
-            ->will($this->returnValue($this->tokenResponse[4]));
+            ->will($this->returnValue(new Response(200,array(),json_encode($this->tokenResponse[4]))));
 
         $tokenRequest = new TokenRequest($client, $this->clientConfig[4]);
         $tokenResponse = $tokenRequest->withAuthorizationCode('12345');
@@ -219,15 +220,15 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testWithRefreshToken()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
         $client->expects($this->once())
             ->method('post')
             ->with(
                 $this->clientConfig[4]->getTokenEndpoint(),
-                array('refresh_token' => 'refresh_123_456','grant_type'=>'refresh_token'),
-                array('Accept' => 'application/json')
+                array('Accept' => 'application/json'),
+                array('refresh_token' => 'refresh_123_456','grant_type'=>'refresh_token')
             )
-            ->will($this->returnValue($this->tokenResponse[0]));
+            ->will($this->returnValue(new Response(200,array(),json_encode($this->tokenResponse[0]))));
 
         $tokenRequest = new TokenRequest($client, $this->clientConfig[0]);
         $result = $tokenRequest->withRefreshToken('refresh_123_456');
@@ -237,14 +238,14 @@ class TokenRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testBrokenJsonResponse()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->once())
             ->method('post')
             ->with(
                 $this->clientConfig[0]->getTokenEndpoint(),
-                array('code' => '12345','grant_type'=>'authorization_code'),
-                array('Accept' => 'application/json')
+                array('Accept' => 'application/json'),
+                array('code' => '12345','grant_type'=>'authorization_code')
             )
             ->willThrowException(new \fkooman\OAuth\Client\Exception\TokenResponseException());
 

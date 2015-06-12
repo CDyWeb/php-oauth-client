@@ -16,6 +16,7 @@
  */
 namespace fkooman\OAuth\Client;
 
+use cdyweb\http\psr\Response;
 use fkooman\OAuth\Common\Scope;
 
 class ApiTest extends \PHPUnit_Framework_TestCase
@@ -46,7 +47,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
     public function testGetAccessTokenWithoutToken()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->never())->method('post');
 
@@ -64,7 +65,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
     public function testGetAccessTokenWithToken()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->never())->method('post');
 
@@ -93,20 +94,20 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
     public function testGetAccessTokenWithExpiredAccessTokenAndRefreshToken()
     {
-        $client = $this->getMock('\fkooman\OAuth\Client\HttpClientInterface');
+        $client = $this->getMock('\cdyweb\http\Adapter');
 
         $client->expects($this->once())
             ->method('post')
             ->with(
                 $this->clientConfig[0]->getTokenEndpoint(),
-                array('refresh_token' => 'my_refresh_token_value','grant_type'=>'refresh_token'),
-                array('Accept' => 'application/json')
+                array('Accept' => 'application/json'),
+                array('refresh_token' => 'my_refresh_token_value','grant_type'=>'refresh_token')
             )
-            ->will($this->returnValue(array(
+            ->will($this->returnValue(new Response(200, array(), json_encode(array(
                 'access_token' => 'my_new_access_token_value',
                 'token_type' => 'BeArEr',
                 'refresh_token' => 'why_not_a_refresh_token',
-            )));
+            )))));
 
         $api = new Api('foo', $this->clientConfig[0], $this->storage, $client);
         $context = new Context('a_user', array('foo', 'bar'));

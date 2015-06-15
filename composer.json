@@ -18,9 +18,11 @@
   "description": "PHP OAuth 2.0 Client",
   "license": "LGPL-3.0+",
   "name": "cdyweb/oauth-client",
+  "minimum-stability": "dev",
   "require": {
     "ext-openssl": "*",
     "fkooman/oauth-common": "~0.5.0",
+    "cdyweb/http-adapter": "*",
     "php": ">=5.3"
   },
   "require-dev": {

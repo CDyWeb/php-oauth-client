@@ -89,4 +89,10 @@ class AccessToken extends Token
     {
         return $this->expiresIn;
     }
+
+    function __toString()
+    {
+        return $this->getAccessToken();
+    }
+
 }

@@ -65,7 +65,7 @@ Below is a simple example `composer.json` file you could use:
     {
         "name": "fkooman/my-demo-oauth-app",
         "require": {
-            "fkooman/php-oauth-client": "dev-master"
+            "fkooman/oauth-client": "dev-master"
         }
     }
 
@@ -127,7 +127,6 @@ violating services are:
 ## Initializing the API
 Now you can initialize the `Api` object:
     
-    
     $api = new Api("foo", $clientConfig, new SessionStorage(), new Guzzle3Client());
     
 In this example we use the `SessionStorage` token storage backend. This is used 
@@ -137,7 +136,8 @@ backend instead, see below.
 
 You also need to provide an instance of Guzzle, or in this case the 
 `Guzzle3Client` which is a HTTP client used to exchange authorization codes 
-for access tokens, or use a refresh token to obtain a new access token.
+for access tokens, or use a refresh token to obtain a new access token. There 
+is also a `Guzzle6Client` available if your application already uses Guzzle 6.
 
 ## Requesting Tokens
 In order to request tokens you need to use two methods: `Api::getAccessToken()` 
@@ -193,37 +193,17 @@ next section below.
 
 Assuming you already had an access token, i.e.: the response from 
 `Api::getAccessToken()` was not `false` you can now try to get the resource. 
-This example uses Guzzle as well:
+You can usually request the resource by setting the `Authorization` header,
+like this: `Authorization: Bearer access_token` where `access_token` is the
+value of `Api::getAccessToken()`.
 
-    $apiUrl = 'http://www.example.org/resource';
+If the request fails with a `401` it means something was wrong with the token. 
+It possibly expired or was revoked. You can remove the currently stored 
+access token and try again:
+
+    $api->deleteAccessToken($context);
+    $api->deleteRefreshToken($context);
     
-    try {
-        $client = new Client();
-        $bearerAuth = new BearerAuth($accessToken->getAccessToken());
-        $client->addSubscriber($bearerAuth);
-        $response = $client->get($apiUrl)->send();
-
-        header("Content-Type: application/json");
-        echo $response->getBody();
-    } catch (BearerErrorResponseException $e) {
-        if ("invalid_token" === $e->getBearerReason()) {
-            // the token we used was invalid, possibly revoked, we throw it away
-            $api->deleteAccessToken($context);
-            $api->deleteRefreshToken($context);
-
-            /* no valid access token available, go to authorization server */
-            header("HTTP/1.1 302 Found");
-            header("Location: " . $api->getAuthorizeUri($context));
-            exit;
-        }
-        throw $e;
-    }
-    
-Pay special attention to the `BearerErrorResponseException` where both the 
-access token and refresh token are deleted when the access token does not work.
-If that happens, the browser is redirected like in the case when there was no
-token yet.
-
 ## Handling the Callback
 The above situation assumed you already had a valid access token. If you didn't
 you got redirected to the authorization server where you had to accept the 
